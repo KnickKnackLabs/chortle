@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
 
-import { buildParameters, readTaskMetadata, renderArgv } from "./generate";
+import { renderArgv } from "./argv";
+// import { buildParameters } from "./parameter-schema";
+import { readTaskMetadata } from "./task-metadata";
 
 // const metadata = await readTaskMetadata("math:sum");
 // const parameters = buildParameters(metadata.usage_spec.cmd);
