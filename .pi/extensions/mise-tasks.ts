@@ -7,18 +7,28 @@ const projectDirectory = fileURLToPath(new URL("../../", import.meta.url));
 
 export default async function (pi: ExtensionAPI) {
   async function describeTask(taskName: string) {
-    const metadata = await pi.exec("mise", ["tasks", "info", taskName, "--json"], {
-      cwd: projectDirectory,
-    });
+    const metadata = await pi.exec(
+      "mise",
+      ["tasks", "info", taskName, "--json"],
+      {
+        cwd: projectDirectory,
+      },
+    );
     if (metadata.code !== 0) {
-      throw new Error(metadata.stderr || `Could not read ${taskName} task metadata.`);
+      throw new Error(
+        metadata.stderr || `Could not read ${taskName} task metadata.`,
+      );
     }
 
     const task = JSON.parse(metadata.stdout);
     return task.description?.trim() || `Run the ${taskName} Mise task.`;
   }
 
-  async function runTask(taskName: string, args: string[], signal?: AbortSignal) {
+  async function runTask(
+    taskName: string,
+    args: string[],
+    signal?: AbortSignal,
+  ) {
     const result = await pi.exec("mise", ["run", taskName, ...args], {
       cwd: projectDirectory,
       signal,
@@ -79,10 +89,12 @@ export default async function (pi: ExtensionAPI) {
         case: Type.Union([Type.Literal("upper"), Type.Literal("lower")], {
           description: "Letter case to use",
         }),
-        reverse: Type.Optional(Type.Boolean({
-          default: false,
-          description: "Reverse the transformed text",
-        })),
+        reverse: Type.Optional(
+          Type.Boolean({
+            default: false,
+            description: "Reverse the transformed text",
+          }),
+        ),
       }),
 
       async execute(_toolCallId, params, signal) {
@@ -100,12 +112,16 @@ export default async function (pi: ExtensionAPI) {
       label: "math:sum",
       description: await describeTask("math:sum"),
       parameters: Type.Object({
-        numbers: Type.Array(Type.String({
-          description: "Integer to add. Must satisfy: value matches '^-?[0-9]+$'",
-        }), {
-          minItems: 1,
-          description: "Integers to add",
-        }),
+        numbers: Type.Array(
+          Type.String({
+            description:
+              "Integer to add. Must satisfy: value matches '^-?[0-9]+$'",
+          }),
+          {
+            minItems: 1,
+            description: "Integers to add",
+          },
+        ),
       }),
 
       async execute(_toolCallId, params, signal) {
