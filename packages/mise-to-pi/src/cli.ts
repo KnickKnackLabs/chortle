@@ -1,3 +1,7 @@
 #!/usr/bin/env bun
 
-console.log("mise-to-pi");
+import { buildParameters, readTaskMetadata } from "./generate";
+
+const metadata = await readTaskMetadata("math:sum");
+const parameters = buildParameters(metadata.usage_spec.cmd);
+console.log(JSON.stringify(parameters, null, 2));
