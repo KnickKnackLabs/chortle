@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #MISE description="Print a greeting a chosen number of times."
 #USAGE arg "<name>" help="Who to greet"
-#USAGE flag "--greeting <greeting>" required=#true help="Greeting to use"
+#USAGE flag "-g --greeting <greeting>" required=#true help="Greeting to use"
 #USAGE flag "--times <times>" default="1" help="Number of greetings, from 1 to 5" {
 #USAGE   arg "<times>" validate="value matches '^[1-5]$'" validate_error="must be a whole number from 1 to 5"
 #USAGE }
