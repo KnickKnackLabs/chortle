@@ -1,0 +1,8 @@
+[settings]
+quiet = true
+task_output = "interleave"
+experimental = true
+
+[tools]
+bun = "latest"
+pi = "latest"

@@ -1,0 +1,9 @@
+#!/usr/bin/env bun
+//MISE description="Add one or more integers."
+//USAGE arg "<numbers>" var=#true allow_negative_numbers=#true help="Integers to add" validate="value matches '^-?[0-9]+$'" validate_error="must be an integer"
+
+const numbers = process.argv.slice(2);
+if (numbers[0] === "--") numbers.shift();
+
+const total = numbers.reduce((sum, number) => sum + BigInt(number), 0n);
+console.log(total.toString());

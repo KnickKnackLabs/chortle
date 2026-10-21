@@ -1,0 +1,17 @@
+#!/usr/bin/env bun
+//MISE description="Change text to upper or lower case, optionally reversing it."
+//USAGE arg "<text>" help="Text to transform"
+//USAGE flag "--case <case>" required=#true help="Letter case to use" {
+//USAGE   choices "upper" "lower"
+//USAGE }
+//USAGE flag "--reverse" default=#false help="Reverse the transformed text"
+
+const text = process.env.usage_text ?? "";
+const transformed = process.env.usage_case === "upper"
+  ? text.toUpperCase()
+  : text.toLowerCase();
+const output = process.env.usage_reverse === "true"
+  ? [...transformed].reverse().join("")
+  : transformed;
+
+console.log(output);
