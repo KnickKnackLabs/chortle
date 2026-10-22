@@ -1,4 +1,11 @@
+import dedentTemplate from "dedent";
+
 import type { UsageArgument, UsageCommand, UsageFlag } from "./task-metadata";
+
+const dedent = dedentTemplate.withOptions({
+  escapeSpecialCharacters: false,
+  alignValues: true,
+});
 
 function getFlagSpelling(flag: UsageFlag): string {
   const longName = flag.long?.[0];
@@ -23,22 +30,22 @@ function renderValueFlag(flag: UsageFlag): string {
     return statement;
   }
 
-  return [
-    `if (${value} !== undefined) {`,
-    `  ${statement}`,
-    `}`, //
-  ].join("\n");
+  return dedent`
+    if (${value} !== undefined) {
+      ${statement}
+    }
+  `;
 }
 
 function renderBooleanFlag(flag: UsageFlag): string {
   const flagName = JSON.stringify(getFlagSpelling(flag));
   const value = `params[${JSON.stringify(flag.name)}]`;
 
-  return [
-    `if (${value} === true) {`,
-    `  argv.push(${flagName});`,
-    `}`, //
-  ].join("\n");
+  return dedent`
+    if (${value} === true) {
+      argv.push(${flagName});
+    }
+  `;
 }
 
 function renderFlag(flag: UsageFlag): string {
@@ -56,11 +63,11 @@ function renderPositionalArg(argument: UsageArgument): string {
     return statement;
   }
 
-  return [
-    `if (${value} !== undefined) {`,
-    `  ${statement}`,
-    `}`, //
-  ].join("\n");
+  return dedent`
+    if (${value} !== undefined) {
+      ${statement}
+    }
+  `;
 }
 
 export function renderArgv(command: UsageCommand): string {
