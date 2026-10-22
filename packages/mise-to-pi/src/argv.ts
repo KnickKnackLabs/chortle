@@ -24,13 +24,18 @@ function getFlagSpelling(flag: UsageFlag): string {
 function renderValueFlag(flag: UsageFlag): string {
   const flagName = JSON.stringify(getFlagSpelling(flag));
   const value = `params[${JSON.stringify(flag.name)}]`;
-  const statement = `argv.push(${flagName}, ${value});`;
+
+  const statement = dedent`
+    // biome-ignore lint/complexity/useLiteralKeys: generated code
+    argv.push(${flagName}, ${value});
+  `;
 
   if (flag.required) {
     return statement;
   }
 
   return dedent`
+    // biome-ignore lint/complexity/useLiteralKeys: generated code
     if (${value} !== undefined) {
       ${statement}
     }
@@ -42,6 +47,7 @@ function renderBooleanFlag(flag: UsageFlag): string {
   const value = `params[${JSON.stringify(flag.name)}]`;
 
   return dedent`
+    // biome-ignore lint/complexity/useLiteralKeys: generated code
     if (${value} === true) {
       argv.push(${flagName});
     }
@@ -57,13 +63,18 @@ function renderFlag(flag: UsageFlag): string {
 function renderPositionalArg(argument: UsageArgument): string {
   const value = `params[${JSON.stringify(argument.name)}]`;
   const values = argument.var ? `...${value}` : value;
-  const statement = `argv.push(${values});`;
+
+  const statement = dedent`
+    // biome-ignore lint/complexity/useLiteralKeys: generated code
+    argv.push(${values});
+  `;
 
   if (argument.required) {
     return statement;
   }
 
   return dedent`
+    // biome-ignore lint/complexity/useLiteralKeys: generated code
     if (${value} !== undefined) {
       ${statement}
     }

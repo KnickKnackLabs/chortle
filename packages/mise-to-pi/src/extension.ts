@@ -33,6 +33,7 @@ const renderRunner = (): string => dedent`
 
     if (result.code !== 0) {
       throw new Error(
+        // biome-ignore lint/style/useTemplate: generated code
         result.stderr || "Mise task failed with exit code " + result.code,
       );
     }
