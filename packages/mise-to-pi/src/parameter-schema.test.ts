@@ -1,65 +1,68 @@
 import { describe, expect, test } from "bun:test";
+
 import { buildParameters } from "./parameter-schema";
 import type { UsageCommand } from "./task-metadata";
 
-test("marks only required arguments and flags as required", () => {
-  const command: UsageCommand = {
-    args: [
-      { name: "requiredArgument", required: true },
-      { name: "optionalArgument", required: false },
-    ],
-    flags: [
-      {
-        name: "requiredValueFlag",
-        long: ["required-value"],
-        short: [],
-        required: true,
-        arg: { name: "requiredFlagValue", required: true },
-      },
-      {
-        name: "optionalValueFlag",
-        long: ["optional-value"],
-        short: [],
-        required: false,
-        arg: { name: "optionalFlagValue", required: true },
-      },
-    ],
-  };
+describe("parameter schemas", () => {
+  test("marks only required arguments and flags as required", () => {
+    const command: UsageCommand = {
+      args: [
+        { name: "requiredArgument", required: true },
+        { name: "optionalArgument", required: false },
+      ],
+      flags: [
+        {
+          name: "requiredValueFlag",
+          long: ["required-value"],
+          short: [],
+          required: true,
+          arg: { name: "requiredFlagValue", required: true },
+        },
+        {
+          name: "optionalValueFlag",
+          long: ["optional-value"],
+          short: [],
+          required: false,
+          arg: { name: "optionalFlagValue", required: true },
+        },
+      ],
+    };
 
-  const parameters = buildParameters(command);
+    const parameters = buildParameters(command);
 
-  expect(Object.keys(parameters.properties)).toEqual([
-    "requiredArgument",
-    "optionalArgument",
-    "requiredValueFlag",
-    "optionalValueFlag",
-  ]);
-  expect(parameters.required).toEqual([
-    "requiredArgument",
-    "requiredValueFlag",
-  ]);
-});
+    expect(Object.keys(parameters.properties)).toEqual([
+      "requiredArgument",
+      "optionalArgument",
+      "requiredValueFlag",
+      "optionalValueFlag",
+    ]);
+    expect(parameters.required).toEqual([
+      "requiredArgument",
+      "requiredValueFlag",
+    ]);
+  });
 
-test("includes help, validation text, and choices in string schemas", () => {
-  const command: UsageCommand = {
-    args: [
-      {
-        name: "constrainedStringValue",
-        help: "Choose an allowed string value",
-        validate: "value matches '^allowed-'",
-        choices: { choices: ["allowed-first", "allowed-second"] },
-      },
-    ],
-    flags: [],
-  };
+  test("includes help, validation text, and choices in string schemas", () => {
+    const command: UsageCommand = {
+      args: [
+        {
+          name: "constrainedStringValue",
+          help: "Choose an allowed string value",
+          validate: "value matches '^allowed-'",
+          choices: { choices: ["allowed-first", "allowed-second"] },
+        },
+      ],
+      flags: [],
+    };
 
-  const parameters = buildParameters(command);
+    const parameters = buildParameters(command);
 
-  expect(parameters.properties.constrainedStringValue).toEqual({
-    type: "string",
-    description:
-      "Choose an allowed string value. Must satisfy: value matches '^allowed-'",
-    enum: ["allowed-first", "allowed-second"],
+    expect(parameters.properties.constrainedStringValue).toEqual({
+      type: "string",
+      description:
+        "Choose an allowed string value. Must satisfy: value matches '^allowed-'",
+      enum: ["allowed-first", "allowed-second"],
+    });
   });
 });
 
