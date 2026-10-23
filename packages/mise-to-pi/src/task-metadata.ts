@@ -37,3 +37,12 @@ export type TaskMetadata = {
 export async function readTaskMetadata(name: string): Promise<TaskMetadata> {
   return $`mise tasks info ${name} --json`.json();
 }
+
+type TaskSummary = {
+  name: string;
+};
+
+export const readLocalTaskNames = async (): Promise<string[]> =>
+  ((await $`mise tasks ls --local --json`.json()) as TaskSummary[]).map(
+    (task) => task.name,
+  );

@@ -5,10 +5,11 @@ import { dirname, relative, resolve } from "node:path";
 import { Command } from "commander";
 
 import { renderExtension } from "./extension";
-import { readTaskMetadata } from "./task-metadata";
+import { readLocalTaskNames, readTaskMetadata } from "./task-metadata";
+import { createSelector } from "./task-selection";
 
 type Args = {
-  task: string;
+  task: string[];
   output: string;
   force: boolean;
 };
@@ -16,7 +17,11 @@ type Args = {
 const program = new Command()
   .name("mise-to-pi")
   .description("Generate standalone Pi tool extensions from Mise tasks")
-  .requiredOption("-t, --task <name>", "Mise task to expose")
+  .requiredOption(
+    "-t, --task <selectors...>",
+    "Task names or globs to expose",
+    [],
+  )
   .requiredOption("-o, --output <file>", "Write the extension to this file")
   .option("-f, --force", "Overwrite an existing output file", false)
   .parse();
@@ -30,8 +35,15 @@ const outputDirectory = dirname(outputPath);
 
 const relativeRoot = relative(outputDirectory, projectDirectory) || ".";
 
+const tasks = createSelector(options.task)(
+  await readLocalTaskNames(), // tasks
+);
+
 // Generate and save the extension
-const metadata = await readTaskMetadata(options.task);
+const metadata = await Promise.all(
+  tasks.map(readTaskMetadata), // metadata
+);
+
 const source = renderExtension(metadata, `${relativeRoot}/`);
 
 await mkdir(outputDirectory, { recursive: true });

@@ -54,11 +54,11 @@ const renderRunner = (): string => dedent`
 `;
 
 export function renderExtension(
-  metadata: TaskMetadata,
+  metadata: TaskMetadata[],
   relativeProjectRoot: string,
 ): string {
   const runnerCode = renderRunner();
-  const toolCode = renderTool(metadata);
+  const toolCode = metadata.map(renderTool);
   const projectRoot = JSON.stringify(relativeProjectRoot);
 
   return dedent`
@@ -74,7 +74,8 @@ export function renderExtension(
 
     export default function (pi: ExtensionAPI) {
       ${runnerCode}
-      ${toolCode}
+
+      ${toolCode.join("\n\n")}
     }
   `;
 }
