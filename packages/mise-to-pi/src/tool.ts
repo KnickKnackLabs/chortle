@@ -9,23 +9,28 @@ const dedent = dedentTemplate.withOptions({
   alignValues: true,
 });
 
-export function renderTool(metadata: TaskMetadata): string {
-  const command = metadata.usage_spec.cmd;
-  const toolName = metadata.name.replace(/[^a-zA-Z0-9_]/g, "_");
-  const parameters = JSON.stringify(buildParameters(command), null, 2);
-  const argvCode = renderArgv(command);
+export const renderTool =
+  ({ prefix = "" }) =>
+  (metadata: TaskMetadata): string => {
+    const name = prefix
+      ? `${prefix}_${metadata.name}` //
+      : metadata.name;
 
-  return dedent`
-    pi.registerTool(defineTool({
-      name: ${JSON.stringify(toolName)},
-      label: ${JSON.stringify(metadata.name)},
-      description: ${JSON.stringify(metadata.description)},
-      parameters: ${parameters} as const,
+    const command = metadata.usage_spec.cmd;
+    const parameters = JSON.stringify(buildParameters(command), null, 2);
+    const argvCode = renderArgv(command);
 
-      async execute(_toolCallId, params, signal) {
-        ${argvCode}
-        return runTask(${JSON.stringify(metadata.name)}, argv, signal);
-      }
-    }));
-  `;
-}
+    return dedent`
+      pi.registerTool(defineTool({
+        name: ${JSON.stringify(name.replace(/[^a-zA-Z0-9_]/g, "_"))},
+        label: ${JSON.stringify(metadata.name)},
+        description: ${JSON.stringify(metadata.description)},
+        parameters: ${parameters} as const,
+
+        async execute(_toolCallId, params, signal) {
+          ${argvCode}
+          return runTask(${JSON.stringify(metadata.name)}, argv, signal);
+        }
+      }));
+    `;
+  };

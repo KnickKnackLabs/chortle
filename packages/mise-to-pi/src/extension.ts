@@ -1,7 +1,6 @@
 import dedentTemplate from "dedent";
 
 import type { TaskMetadata } from "./task-metadata";
-import { renderTool } from "./tool";
 
 const dedent = dedentTemplate.withOptions({
   escapeSpecialCharacters: false,
@@ -53,29 +52,21 @@ const renderRunner = (): string => dedent`
   }
 `;
 
-export function renderExtension(
-  metadata: TaskMetadata[],
-  relativeProjectRoot: string,
-): string {
-  const runnerCode = renderRunner();
-  const toolCode = metadata.map(renderTool);
-  const projectRoot = JSON.stringify(relativeProjectRoot);
+type ToolRenderer = (metadata: TaskMetadata) => string;
 
-  return dedent`
-    import { fileURLToPath } from "node:url";
-    import {
-      defineTool,
-      type ExtensionAPI,
-    } from "@earendil-works/pi-coding-agent";
+export const renderExtension =
+  (renderTool: ToolRenderer) =>
+  (metadata: TaskMetadata[], projectDirectory: string): string =>
+    dedent`
+      import {
+        defineTool,
+        type ExtensionAPI,
+      } from "@earendil-works/pi-coding-agent";
 
-    const projectDirectory = fileURLToPath(
-      new URL(${projectRoot}, import.meta.url),
-    );
+      const projectDirectory = ${JSON.stringify(projectDirectory)};
 
-    export default function (pi: ExtensionAPI) {
-      ${runnerCode}
-
-      ${toolCode.join("\n\n")}
-    }
-  `;
-}
+      export default function (pi: ExtensionAPI) {
+        ${renderRunner()}
+        ${metadata.map(renderTool).join("\n\n")}
+      }
+    `;
