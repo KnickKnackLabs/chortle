@@ -8,7 +8,12 @@ import type { ExecOptions } from "@earendil-works/pi-coding-agent";
 
 import { renderExtension } from "./extension";
 import type { TaskMetadata } from "./task-metadata";
-import { renderTool } from "./tool";
+import {
+  renderTool,
+  withoutCollisions,
+  withPrefix,
+  withSanitation,
+} from "./tool";
 
 const projectDirectory = fileURLToPath(new URL("../../../", import.meta.url));
 
@@ -51,7 +56,12 @@ describe("generated extension", () => {
         ),
       );
 
-      const source = renderExtension(renderTool({ prefix: "chortle" }))(
+      let nameTool = (task: TaskMetadata) => task.name;
+      nameTool = withPrefix("chortle")(nameTool);
+      nameTool = withSanitation(nameTool);
+      nameTool = withoutCollisions(new Map())(nameTool);
+
+      const source = renderExtension(renderTool(nameTool))(
         metadata,
         projectDirectory,
       );

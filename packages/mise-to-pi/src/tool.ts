@@ -9,27 +9,59 @@ const dedent = dedentTemplate.withOptions({
   alignValues: true,
 });
 
-export const renderTool =
-  ({ prefix = "" }) =>
-  (metadata: TaskMetadata): string => {
-    const name = prefix
-      ? `${prefix}_${metadata.name}` //
-      : metadata.name;
+export type NameFn = (task: TaskMetadata) => string;
 
-    const command = metadata.usage_spec.cmd;
+export const withPrefix =
+  (prefix: string) =>
+  (name: NameFn): NameFn =>
+  (task: TaskMetadata) =>
+    `${prefix}_${name(task)}`;
+
+export const withSanitation =
+  (name: NameFn): NameFn =>
+  (task: TaskMetadata) =>
+    name(task).replace(/[^a-zA-Z0-9_]/g, "_");
+
+const raise = (e: Error): never => {
+  throw e;
+};
+
+export const withoutCollisions =
+  (tasks: Map<string, TaskMetadata>) =>
+  (name: NameFn): NameFn =>
+  (task: TaskMetadata) => {
+    const out = name(task);
+
+    const existing = tasks.get(out);
+    !existing || existing.name === task.name
+      ? tasks.set(out, task)
+      : raise(
+          new Error(
+            `Tasks "${existing.name}" and "${task.name}" both generate tool name "${out}". ` +
+              "Rename one task or select only one with --task.",
+          ),
+        );
+
+    return out;
+  };
+
+export const renderTool =
+  (name: NameFn) =>
+  (task: TaskMetadata): string => {
+    const command = task.usage_spec.cmd;
     const parameters = JSON.stringify(buildParameters(command), null, 2);
     const argvCode = renderArgv(command);
 
     return dedent`
       pi.registerTool(defineTool({
-        name: ${JSON.stringify(name.replace(/[^a-zA-Z0-9_]/g, "_"))},
-        label: ${JSON.stringify(metadata.name)},
-        description: ${JSON.stringify(metadata.description)},
+        name: ${JSON.stringify(name(task))},
+        label: ${JSON.stringify(task.name)},
+        description: ${JSON.stringify(task.description)},
         parameters: ${parameters} as const,
 
         async execute(_toolCallId, params, signal) {
           ${argvCode}
-          return runTask(${JSON.stringify(metadata.name)}, argv, signal);
+          return runTask(${JSON.stringify(task.name)}, argv, signal);
         }
       }));
     `;

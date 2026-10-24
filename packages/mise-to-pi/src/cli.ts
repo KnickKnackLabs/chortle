@@ -5,9 +5,18 @@ import { dirname, resolve } from "node:path";
 import { Command } from "commander";
 
 import { renderExtension } from "./extension";
-import { readLocalTaskNames, readTaskMetadata } from "./task-metadata";
+import {
+  readLocalTaskNames,
+  readTaskMetadata,
+  type TaskMetadata,
+} from "./task-metadata";
 import { createSelector } from "./task-selection";
-import { renderTool } from "./tool";
+import {
+  renderTool,
+  withoutCollisions,
+  withPrefix,
+  withSanitation,
+} from "./tool";
 
 type Args = {
   task: string[];
@@ -41,7 +50,13 @@ const metadata = await Promise.all(
 );
 
 const projectDirectory = process.cwd();
-const source = renderExtension(renderTool({ prefix: options.prefix }))(
+
+let nameTool = (task: TaskMetadata) => task.name;
+nameTool = options.prefix ? withPrefix(options.prefix)(nameTool) : nameTool;
+nameTool = withSanitation(nameTool);
+nameTool = withoutCollisions(new Map())(nameTool);
+
+const source = renderExtension(renderTool(nameTool))(
   metadata,
   projectDirectory,
 );
