@@ -3,6 +3,10 @@
   "description": "Generate standalone Pi tool extensions from Mise tasks and their Usage specifications.",
   "version": "0.1.0",
   "type": "module",
+  "files": [
+    "src/*.ts",
+    "!src/*.test.ts"
+  ],
   "bin": {
     "mise-to-pi": "./src/cli.ts"
   },
