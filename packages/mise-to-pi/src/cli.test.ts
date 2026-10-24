@@ -3,6 +3,8 @@ import { mkdtemp, readdir, rm } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { $ } from "bun";
 
+import dedent from "dedent";
+
 const projectDirectory = resolve(import.meta.dir, "../../..");
 const cliPath = join(import.meta.dir, "cli.ts");
 
@@ -82,7 +84,7 @@ describe("CLI", () => {
       const outputPath = join(temporaryDirectory, "nested", "mise-tasks.ts");
 
       const result =
-        await $`${process.execPath} ${cliPath} --task math:sum 'missing:*' --output ${outputPath}`
+        await $`${process.execPath} ${cliPath} --task math:sum --task 'missing:*' --output ${outputPath}`
           .cwd(projectDirectory)
           .env({ ...process.env, MISE_AUTO_INSTALL: "false" })
           .nothrow()
@@ -95,6 +97,46 @@ describe("CLI", () => {
       );
 
       expect(await readdir(temporaryDirectory)).toEqual([]);
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  test("rejects colliding tool names before printing source or creating output directories", async () => {
+    const temporaryDirectory = await mkdtemp(
+      join(projectDirectory, "node_modules/.mise-to-pi-cli-"),
+    );
+
+    const mise = dedent`
+      [tasks."foo-bar"]
+      run = "echo first"
+
+      [tasks."foo:bar"]
+      run = "echo second"
+    `;
+
+    try {
+      await Bun.write(join(temporaryDirectory, "mise.toml"), mise);
+      const outputPath = join(temporaryDirectory, "nested", "mise-tasks.ts");
+
+      const result =
+        await $`${process.execPath} ${cliPath} --task foo-bar --task foo:bar --output ${outputPath}`
+          .cwd(temporaryDirectory)
+          .env({
+            ...process.env,
+            MISE_AUTO_INSTALL: "false",
+            MISE_TRUSTED_CONFIG_PATHS: temporaryDirectory,
+          })
+          .nothrow()
+          .quiet();
+
+      expect(result.exitCode).not.toBe(0);
+      expect(result.stdout.toString()).toBe("");
+      expect(result.stderr.toString()).toContain(
+        'Tasks "foo-bar" and "foo:bar" both generate tool name "foo_bar". ' +
+          "Rename one task or select only one with --task.",
+      );
+      expect(await readdir(temporaryDirectory)).toEqual(["mise.toml"]);
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }
