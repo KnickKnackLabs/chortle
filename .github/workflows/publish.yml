@@ -1,0 +1,38 @@
+name: Publish mise-to-pi
+
+on:
+  push:
+    tags:
+      - "mise-to-pi-v*"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    uses: ./.github/workflows/check.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Verify release tag
+        working-directory: packages/mise-to-pi
+        run: |
+          jq -e 'env.GITHUB_REF_NAME == ("mise-to-pi-v" + .version)' \
+            package.json
+
+      - name: Publish package
+        working-directory: packages/mise-to-pi
+        run: npm publish
