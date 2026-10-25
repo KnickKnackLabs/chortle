@@ -6,8 +6,9 @@ import { CodeBlock, Heading, Link, Paragraph } from "readme";
 const readme = (
   <>
     <Heading level={1}>mise-to-pi</Heading>
-    <Paragraph>{`Mise tasks -> Pi tools`}</Paragraph>
+    <Paragraph>Mise tasks → Pi tools</Paragraph>
 
+    <Heading level={2}>How it works</Heading>
     <Paragraph>A Mise task in .mise/tasks/greet:</Paragraph>
     <CodeBlock lang="bash">
       {dedent`
@@ -41,6 +42,8 @@ const readme = (
     </CodeBlock>
 
     <Heading level={2}>Usage</Heading>
+
+    <Heading level={3}>Generate an extension</Heading>
     <Paragraph>Run from your project's root:</Paragraph>
 
     <CodeBlock lang="bash">
@@ -53,6 +56,7 @@ const readme = (
       Start Pi in that project, or run /reload in an existing session.
     </Paragraph>
 
+    <Heading level={3}>Regenerate</Heading>
     <Paragraph>
       The extension hardcodes the path to the mise project, so regenerate the
       extension if your project moves. If you change your task's name,
@@ -66,6 +70,7 @@ const readme = (
       `}
     </CodeBlock>
 
+    <Heading level={3}>Select tasks</Heading>
     <Paragraph>
       By default, all non-hidden project tasks become tools. Use `--task` to
       select specific tasks.
@@ -76,6 +81,7 @@ const readme = (
       `}
     </CodeBlock>
 
+    <Heading level={3}>Prefix tool names</Heading>
     <Paragraph>
       Use `--prefix` to distinguish tools from different projects.
     </Paragraph>

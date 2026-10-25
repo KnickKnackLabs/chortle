@@ -1,6 +1,8 @@
 # mise-to-pi
 
-Mise tasks -> Pi tools
+Mise tasks → Pi tools
+
+## How it works
 
 A Mise task in .mise/tasks/greet:
 
@@ -33,6 +35,8 @@ bun add --global @knickknacklabs/mise-to-pi
 
 ## Usage
 
+### Generate an extension
+
 Run from your project's root:
 
 ```bash
@@ -40,6 +44,8 @@ mise-to-pi --output .pi/extensions/mise-tasks.ts
 ```
 
 Start Pi in that project, or run /reload in an existing session.
+
+### Regenerate
 
 The extension hardcodes the path to the mise project, so regenerate the extension if your project moves. If you change your task's name, description or `usage` specification, regenerate the extension, as well.
 
@@ -49,11 +55,15 @@ Use `--force` to replace an existing extension
 mise-to-pi --force --output .pi/extensions/mise-tasks.ts
 ```
 
+### Select tasks
+
 By default, all non-hidden project tasks become tools. Use `--task` to select specific tasks.
 
 ```bash
 mise-to-pi --task greet --task 'foo:*' --output .pi/extensions/mise-tasks.ts
 ```
+
+### Prefix tool names
 
 Use `--prefix` to distinguish tools from different projects.
 
