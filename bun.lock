@@ -16,7 +16,7 @@
     },
     "packages/mise-to-pi": {
       "name": "@knickknacklabs/mise-to-pi",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "bin": {
         "mise-to-pi": "./src/cli.ts",
       },

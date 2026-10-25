@@ -28,6 +28,7 @@ type Args = {
 const program = new Command()
   .name("mise-to-pi")
   .description("Generate standalone Pi tool extensions from Mise tasks")
+  .argument("[project-directory]", "Mise project directory", ".")
   .requiredOption(
     "-t, --task <selectors...>",
     "Task names or globs to expose",
@@ -39,17 +40,16 @@ const program = new Command()
   .parse();
 
 const options = program.opts<Args>();
+const projectDirectory = resolve(program.args[0] ?? ".");
 
 const tasks = createSelector(options.task)(
-  await readLocalTaskNames(), // tasks
+  await readLocalTaskNames(projectDirectory)(), // tasks
 );
 
 // Generate and save the extension
 const metadata = await Promise.all(
-  tasks.map(readTaskMetadata), // metadata
+  tasks.map(readTaskMetadata(projectDirectory)), // metadata
 );
-
-const projectDirectory = process.cwd();
 
 let nameTool = (task: TaskMetadata) => task.name;
 nameTool = options.prefix ? withPrefix(options.prefix)(nameTool) : nameTool;
@@ -64,7 +64,7 @@ const source = renderExtension(renderTool(nameTool))(
 if (options.output === undefined) {
   process.stdout.write(source);
 } else {
-  const outputPath = resolve(projectDirectory, options.output);
+  const outputPath = resolve(options.output);
   const outputDirectory = dirname(outputPath);
 
   await mkdir(outputDirectory, { recursive: true });

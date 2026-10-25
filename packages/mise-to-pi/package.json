@@ -1,7 +1,7 @@
 {
   "name": "@knickknacklabs/mise-to-pi",
   "description": "Generate standalone Pi tool extensions from Mise tasks and their Usage specifications.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "MIT",
   "repository": {
     "type": "git",

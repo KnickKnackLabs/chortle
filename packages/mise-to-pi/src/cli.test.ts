@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, realpath, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { $ } from "bun";
@@ -91,6 +91,53 @@ describe("CLI", () => {
       );
 
       expect(toolNames).toEqual(["first", "second"]);
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
+  });
+
+  test("generates from a relative project path and writes output relative to the caller", async () => {
+    const temporaryDirectory = await mkdtemp(
+      join(await realpath(tmpdir()), "mise-to-pi-cli-"),
+    );
+
+    const targetDirectory = join(temporaryDirectory, "project");
+    const callerDirectory = join(temporaryDirectory, "caller");
+
+    const mise = dedent`
+      [tasks."fixture:hello"]
+      run = "echo hello"
+    `;
+
+    try {
+      await mkdir(targetDirectory);
+      await mkdir(callerDirectory);
+
+      await Bun.write(join(targetDirectory, "mise.toml"), mise);
+
+      await $`${process.execPath} ${cliPath} ../project --output nested/extension.ts`
+        .cwd(callerDirectory)
+        .env({
+          ...process.env,
+          MISE_AUTO_INSTALL: "false",
+          MISE_TRUSTED_CONFIG_PATHS: targetDirectory,
+        })
+        .quiet();
+
+      const source = await Bun.file(
+        join(callerDirectory, "nested", "extension.ts"),
+      ).text();
+
+      expect(source).toContain(
+        `const projectDirectory = ${JSON.stringify(targetDirectory)};`,
+      );
+
+      const toolNames = Array.from(
+        source.matchAll(/^\s+name: "([^"]+)"/gm),
+        (match) => match[1],
+      );
+
+      expect(toolNames).toEqual(["fixture_hello"]);
     } finally {
       await rm(temporaryDirectory, { recursive: true, force: true });
     }

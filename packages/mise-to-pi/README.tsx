@@ -44,11 +44,21 @@ const readme = (
     <Heading level={2}>Usage</Heading>
 
     <Heading level={3}>Generate an extension</Heading>
-    <Paragraph>Run from your project's root:</Paragraph>
 
+    <Paragraph>Run from your project's root:</Paragraph>
     <CodeBlock lang="bash">
       {dedent`
         mise-to-pi --output .pi/extensions/mise-tasks.ts
+      `}
+    </CodeBlock>
+
+    <Paragraph>
+      You can also specify a project directory. Relative output paths are
+      resolved from your current directory.
+    </Paragraph>
+    <CodeBlock lang="bash">
+      {dedent`
+        mise-to-pi ~/projects/my-app --output ~/.pi/agent/extensions/my-app.ts
       `}
     </CodeBlock>
 

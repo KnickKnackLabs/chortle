@@ -34,15 +34,21 @@ export type TaskMetadata = {
   };
 };
 
-export async function readTaskMetadata(name: string): Promise<TaskMetadata> {
-  return $`mise tasks info ${name} --json`.json();
-}
+export const readTaskMetadata = (directory: string) => {
+  return async (name: string): Promise<TaskMetadata> =>
+    $`mise tasks info ${name} --json`.cwd(directory).json();
+};
 
 type TaskSummary = {
   name: string;
 };
 
-export const readLocalTaskNames = async (): Promise<string[]> =>
-  ((await $`mise tasks ls --local --json`.json()) as TaskSummary[]).map(
-    (task) => task.name,
-  );
+export const readLocalTaskNames = (directory: string) => {
+  return async (): Promise<string[]> => {
+    const tasks = (await $`mise tasks ls --local --json`
+      .cwd(directory)
+      .json()) as TaskSummary[];
+
+    return tasks.map((task) => task.name);
+  };
+};

@@ -43,6 +43,12 @@ Run from your project's root:
 mise-to-pi --output .pi/extensions/mise-tasks.ts
 ```
 
+You can also specify a project directory. Relative output paths are resolved from your current directory.
+
+```bash
+mise-to-pi ~/projects/my-app --output ~/.pi/agent/extensions/my-app.ts
+```
+
 Start Pi in that project, or run /reload in an existing session.
 
 ### Regenerate
