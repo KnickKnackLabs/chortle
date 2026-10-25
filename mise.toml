@@ -3,6 +3,10 @@ quiet = true
 task_output = "interleave"
 experimental = true
 
+[plugins]
+shiv = "https://github.com/KnickKnackLabs/vfox-shiv"
+
 [tools]
 bun = "latest"
 pi = "latest"
+"shiv:readme" = "0.3"

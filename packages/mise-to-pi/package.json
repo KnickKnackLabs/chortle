@@ -2,10 +2,20 @@
   "name": "@knickknacklabs/mise-to-pi",
   "description": "Generate standalone Pi tool extensions from Mise tasks and their Usage specifications.",
   "version": "0.1.0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KnickKnackLabs/chortle.git",
+    "directory": "packages/mise-to-pi"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "files": [
     "src/*.ts",
-    "!src/*.test.ts"
+    "!src/*.test.ts",
+    "!README.tsx"
   ],
   "bin": {
     "mise-to-pi": "./src/cli.ts"
