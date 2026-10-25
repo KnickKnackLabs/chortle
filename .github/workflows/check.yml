@@ -24,7 +24,10 @@ jobs:
         run: bun test
 
       - name: Lint and format
-        run: ./node_modules/.bin/biome ci .
+        run: mise run check:lint
 
       - name: Check README
-        run: readme build --check --file packages/mise-to-pi/README.tsx
+        run: mise run check:readme
+
+      - name: Check package
+        run: mise run check:package

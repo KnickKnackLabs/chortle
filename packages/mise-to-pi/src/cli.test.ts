@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { $ } from "bun";
 
@@ -62,17 +63,37 @@ describe("CLI", () => {
   });
 
   test("includes every local task when no selectors are supplied", async () => {
-    const result = await $`${process.execPath} ${cliPath}`
-      .cwd(projectDirectory)
-      .env({ ...process.env, MISE_AUTO_INSTALL: "false" })
-      .quiet();
+    const temporaryDirectory = await mkdtemp(join(tmpdir(), "mise-to-pi-cli-"));
 
-    const toolNames = Array.from(
-      result.stdout.toString().matchAll(/^\s+name: "([^"]+)"/gm),
-      (match) => match[1],
-    );
+    const mise = dedent`
+      [tasks.first]
+      run = "echo first"
 
-    expect(toolNames).toEqual(["deez_gonads", "math_sum", "text_transform"]);
+      [tasks.second]
+      run = "echo second"
+    `;
+
+    try {
+      await Bun.write(join(temporaryDirectory, "mise.toml"), mise);
+
+      const result = await $`${process.execPath} ${cliPath}`
+        .cwd(temporaryDirectory)
+        .env({
+          ...process.env,
+          MISE_AUTO_INSTALL: "false",
+          MISE_TRUSTED_CONFIG_PATHS: temporaryDirectory,
+        })
+        .quiet();
+
+      const toolNames = Array.from(
+        result.stdout.toString().matchAll(/^\s+name: "([^"]+)"/gm),
+        (match) => match[1],
+      );
+
+      expect(toolNames).toEqual(["first", "second"]);
+    } finally {
+      await rm(temporaryDirectory, { recursive: true, force: true });
+    }
   });
 
   test("rejects an unmatched selector before creating output directories", async () => {

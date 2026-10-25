@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+#MISE description="Smoke-test the packaged mise-to-pi-CLI"
+set -euo pipefail
+
+scratch=$(mktemp -d)
+
+finish() {
+  local status=$?
+
+  if (( status != 0 )); then
+    cat "${scratch}/output.log" >&2
+  fi
+
+  rm -rf "${scratch}"
+  exit "${status}"
+}
+
+trap finish EXIT
+
+(
+  # Pack the actual publishable files.
+  cd "${MISE_CONFIG_ROOT}/packages/mise-to-pi"
+  bun pm pack --ignore-scripts --destination "${scratch}"
+
+  # Install into an unrelated consumer project.
+  mkdir "${scratch}/consumer" && cd "${scratch}/consumer"
+  printf '%s\n' '{"name": "package-smoke", "private": true}' > package.json
+  bun add --ignore-scripts "${scratch}"/*.tgz
+
+  # Try the installed executable
+  ./node_modules/.bin/mise-to-pi --help
+) >"${scratch}/output.log" 2>&1
+
+printf '%s\n' 'Package smoke test passed.'

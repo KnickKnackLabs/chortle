@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+#MISE description="Check generated README files"
+set -euo pipefail
+
+cd "${MISE_CONFIG_ROOT}"
+
+git ls-files -z --cached --others --exclude-standard -- \
+  README.tsx '**/README.tsx' |
+  while IFS= read -r -d '' file; do
+    readme build --check --file "${file}"
+  done
